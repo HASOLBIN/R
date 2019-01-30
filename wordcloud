@@ -1,0 +1,67 @@
+# package 설치
+install.packages("wordcloud")
+install.packages("RColorBrewer")
+install.packages("KoNLP")
+library(wordcloud)
+library(RColorBrewer)
+library(KoNLP)
+
+# 사전 불러오기
+useSejongDic()
+
+setwd("C:/Users/비니/Documents")
+list.files()
+
+# "가전을 주제로 한 크롤링 파일을 불러와서 wordcloud 시작
+mdata<-readLines("가전크롤링.csv")
+mdata2<-sapply(mdata,extractNoun,USE.NAMES=F)
+mdata2_unlist<-unlist(mdata2)
+head(mdata2_unlist)
+mwordcount<-table(mdata2_unlist)
+
+# 많이 나온 단어순으로 100개 내림차순 정렬
+wordcount_top <-head(sort(mwordcount, decreasing = T),100)
+wordcount_top
+
+# 데이터 정제
+mdata2_unlist<-Filter(function(x){nchar(x)>=2},mdata2_unlist) # 1글자인 단어 제외
+mdata2_unlist<-gsub("\\d+","",mdata2_unlist) # 숫자 제외
+mdata2_unlist<-gsub("가전제품","",mdata2_unlist)
+mdata2_unlist<-gsub("제품","",mdata2_unlist)
+mdata2_unlist<-gsub("가전","",mdata2_unlist)
+mdata2_unlist<-gsub("하게","",mdata2_unlist)
+mdata2_unlist<-gsub("들이","",mdata2_unlist)
+mdata2_unlist<-gsub("하기","",mdata2_unlist)
+mdata2_unlist<-gsub("해서","",mdata2_unlist)
+mdata2_unlist<-gsub("하시","",mdata2_unlist)
+mdata2_unlist<-gsub("경우","",mdata2_unlist)
+mdata2_unlist<-gsub("가성","",mdata2_unlist)
+mdata2_unlist<-gsub("안녕","",mdata2_unlist)
+mdata2_unlist<-gsub("우리","",mdata2_unlist)
+mdata2_unlist<-gsub('[~!@#$%&*()_+.=?<>]',"",mdata2_unlist) # 특수문자 제외
+mdata2_unlist<-gsub("저희","",mdata2_unlist)
+mdata2_unlist<-gsub("이번","",mdata2_unlist)
+mdata2_unlist<-gsub("때문","",mdata2_unlist)
+mdata2_unlist<-gsub("플래너에서","",mdata2_unlist)
+mdata2_unlist<-gsub("전","",mdata2_unlist)
+mdata2_unlist<-gsub("자","",mdata2_unlist)
+mdata2_unlist<-gsub(" ","",mdata2_unlist)
+mdata2_unlist<-gsub("문가","",mdata2_unlist)
+mdata2_unlist<-gsub("문","",mdata2_unlist)
+mdata2_unlist<-gsub("폐가","",mdata2_unlist)
+mdata2_unlist<-gsub("디인","",mdata2_unlist)
+
+mwordcount<-table(mdata2_unlist)
+wordcount_top <-head(sort(mwordcount, decreasing = T),100)
+wordcount_top
+
+# 폰트, 색깔 설정
+windowsFonts(font=windowsFont("a한글사랑L"))
+display.brewer.all()
+color<-brewer.pal(12,"Paired")
+
+# wordcloud 실행
+wordcloud(names(wordcount_top), wordcount_top, scale=c(10,0.3),random.order = FALSE, random.color = TRUE, colors = color,family=“나눔고딕 ExtraBold”)
+
+# 
+savePlot(“machinewordcloud.png”,type=“png”)
